@@ -1,0 +1,11 @@
+[project]
+name = "optiraw"
+version = "0.1"
+description = "Image processing from dng to jpeg using an image quality assessment model"
+readme = "README.md"
+
+authors = [{name = "Artie Dins"}]
+license = {text = "MIT"}
+
+[project.urls]
+Homepage = "https://github.com/artiedins/optiraw"
