@@ -15,7 +15,7 @@ def fast_dng_to_jpg(input_dir, output_dir, slower_optimize=False):
         if filename.lower().endswith(".dng"):
             dng_files.append(os.path.join(input_dir, filename))
 
-    for f in tqdm(sorted(dng_files)):
+    for f in sorted(dng_files):
         out_file = os.path.join(output_dir, os.path.split(f)[-1])[:-4] + ".jpg"
         if os.path.isfile(out_file):
             print(out_file, "skip", flush=True)
@@ -32,7 +32,7 @@ def fast_dng_to_jpg(input_dir, output_dir, slower_optimize=False):
         # if slower_optimize:
         # minimize(pp, pp.best_param, options=dict(eps=1e-3))
         # minimize(pp, pp.best_param, options=dict(eps=2e-7))
-        minimize(pp, pp.best_param, options=dict(eps=1e-3))
+        # minimize(pp, pp.best_param, options=dict(eps=1e-3))
 
         # minimize(pp, torch.randn(3).div(4).numpy(), options=dict(eps=1e-3))
         # minimize(pp, torch.randn(3).div(4).numpy(), options=dict(eps=1e-5))
