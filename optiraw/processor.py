@@ -17,8 +17,8 @@ class Processor:
         # self.iqa_model.to(self.d["img"].device)
         # self.iqa_model.eval()
 
-        # self.iqa_model = pyiqa.create_metric("clipiqa+", metric_mode="NR", device=self.d["img"].device)
-        self.iqa_model = pyiqa.create_metric("musiq", metric_mode="NR", device=self.d["img"].device)
+        self.iqa_model = pyiqa.create_metric("clipiqa+", metric_mode="NR", device=self.d["img"].device)
+        # self.iqa_model = pyiqa.create_metric("musiq", metric_mode="NR", device=self.d["img"].device)
 
     def __call__(self, param):
         self.d["param"] = param.tolist()
@@ -36,5 +36,5 @@ class Processor:
 
     def process_best(self):
         self.d["param"] = self.best_param.tolist()
-        img = process_image(self.d)
+        img = process_image(self.d, print_param=True)
         return img

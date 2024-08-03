@@ -29,7 +29,7 @@ def read_dng(dng_file):
     return dict(img=img, flip=flip, wb=wb.to(device), color_mat=color_mat.to(device))
 
 
-def process_image(d):
+def process_image(d, print_param=False):
     img = d["img"].clone()
     wb = d["wb"].clone()
     flip = d["flip"] + 1
@@ -80,6 +80,9 @@ def process_image(d):
     mult = (2 - img[:, 1]).clamp_min(1).pow(param[2] * 10)
     for i in range(3):
         img[:, i] = img[:, i] * mult
+
+    if print_param:
+        print("PARAM:", wb, param[2])
 
     return img
 
