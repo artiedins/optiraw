@@ -31,7 +31,11 @@ def fast_dng_to_jpg(input_dir, output_dir, slower_optimize=False):
         #    pp(pp.best_param + torch.randn(3).double().mul(i * 3 / 5).numpy())
         # if slower_optimize:
         # minimize(pp, pp.best_param, options=dict(eps=1e-3))
-        minimize(pp, pp.best_param, options=dict(eps=2e-7))
+        # minimize(pp, pp.best_param, options=dict(eps=2e-7))
+
+        minimize(pp, torch.randn(3).div(4).numpy(), options=dict(eps=1e-3))
+        minimize(pp, torch.randn(3).div(4).numpy(), options=dict(eps=1e-5))
+        minimize(pp, torch.randn(3).div(4).numpy(), options=dict(eps=1e-7))
 
         img = pp.process_best()
 
