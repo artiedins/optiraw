@@ -10,14 +10,15 @@ class Processor:
     def __init__(self, dng_file):
         self.d = read_dng(dng_file)
 
-        self.best_param = np.array([0.1, -0.1, 0.1])
+        self.best_param = np.array([0.0, 0.0, 0.05])
         self.best_loss = float("inf")
 
         # self.iqa_model = ARCH_REGISTRY.get("CLIPIQA")(model_type="clipiqa+")
         # self.iqa_model.to(self.d["img"].device)
         # self.iqa_model.eval()
 
-        self.iqa_model = pyiqa.create_metric("clipiqa+", metric_mode="NR", device=self.d["img"].device)
+        # self.iqa_model = pyiqa.create_metric("clipiqa+", metric_mode="NR", device=self.d["img"].device)
+        self.iqa_model = pyiqa.create_metric("musiq", metric_mode="NR", device=self.d["img"].device)
 
     def __call__(self, param):
         self.d["param"] = param.tolist()
