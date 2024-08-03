@@ -5,6 +5,7 @@ from scipy.optimize import minimize
 from PIL import Image
 from tqdm import tqdm
 import numpy as np
+import gc
 
 
 def fast_dng_to_jpg(input_dir, output_dir, slower_optimize=False):
@@ -44,3 +45,10 @@ def fast_dng_to_jpg(input_dir, output_dir, slower_optimize=False):
         img = img.squeeze(0).permute(1, 2, 0)
         img = img.mul(255).round().clamp(0, 255).byte().cpu().numpy()
         Image.fromarray(img).save(out_file, quality=95 if hq else 85)
+
+        del img
+        del pp
+        time.sleep(0.1)
+        gc.collect()
+        time.sleep(0.1)
+        torch.cuda.empty_cache()
