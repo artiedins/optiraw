@@ -129,7 +129,7 @@ def filter_inds_weights(ow, nw):
 
 def resize(img, long_side):
     img = img.clamp(0, 1)
-    img = kornia.geometry.transform.resize(img, long_side, side="long", interpolation="bicubic")
+    img = kornia.geometry.transform.resize(img, long_side, side="long", interpolation="bicubic", antialias=True)
     return img
 
     bs, ch, oh, ow = img.shape

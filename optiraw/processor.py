@@ -1,7 +1,9 @@
 import torch
 import numpy as np
 from .functional import process_image, read_dng, resize
-from pyiqa.utils.registry import ARCH_REGISTRY
+
+# from pyiqa.utils.registry import ARCH_REGISTRY
+import pyiqa
 
 
 class Processor:
@@ -11,9 +13,11 @@ class Processor:
         self.best_param = np.array([0.1, -0.1, 0.1])
         self.best_loss = float("inf")
 
-        self.iqa_model = ARCH_REGISTRY.get("CLIPIQA")(model_type="clipiqa+")
-        self.iqa_model.to(self.d["img"].device)
-        self.iqa_model.eval()
+        # self.iqa_model = ARCH_REGISTRY.get("CLIPIQA")(model_type="clipiqa+")
+        # self.iqa_model.to(self.d["img"].device)
+        # self.iqa_model.eval()
+
+        self.iqa_model = pyiqa.create_metric("clipiqa+", metric_mode="NR", device=self.d["img"].device)
 
     def __call__(self, param):
         self.d["param"] = param.tolist()
