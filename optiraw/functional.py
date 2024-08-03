@@ -3,15 +3,59 @@ import numpy as np
 import rawpy
 import math
 import kornia
+import torch.nn as nn
 
 
-def read_dng(dng_file):
+class MHC(nn.Module):
+    def __init__(self):
+        super().__init__()
+
+        self.mass_conv = nn.Sequential(nn.ReflectionPad2d(2), nn.Conv2d(1, 4, 5, stride=1, bias=False))
+        self.mass_conv[1].weight.data[0, 0] = (
+            torch.tensor([0, 0, -1, 0, 0, 0, 0, 2, 0, 0, -1, 2, 4, 2, -1, 0, 0, 2, 0, 0, 0, 0, -1, 0, 0], dtype=torch.float).div(8).view(5, 5)
+        )
+        self.mass_conv[1].weight.data[1, 0] = (
+            torch.tensor([0, 0, -3 / 2, 0, 0, 0, 2, 0, 2, 0, -3 / 2, 0, 6, 0, -3 / 2, 0, 2, 0, 2, 0, 0, 0, -3 / 2, 0, 0], dtype=torch.float).div(8).view(5, 5)
+        )
+        self.mass_conv[1].weight.data[2, 0] = (
+            torch.tensor([0, 0, -1, 0, 0, 0, -1, 4, -1, 0, 1 / 2, 0, 5, 0, 1 / 2, 0, -1, 4, -1, 0, 0, 0, -1, 0, 0], dtype=torch.float).div(8).view(5, 5)
+        )
+        self.mass_conv[1].weight.data[3, 0] = (
+            torch.tensor([0, 0, 1 / 2, 0, 0, 0, -1, 0, -1, 0, -1, 4, 5, 4, -1, 0, -1, 0, -1, 0, 0, 0, 1 / 2, 0, 0], dtype=torch.float).div(8).view(5, 5)
+        )
+
+    def forward(self, x):
+        y = torch.cat([x, x, x], dim=1)
+        f = self.mass_conv(x)
+
+        y[:, 1, ::2, ::2] = f[:, 0, ::2, ::2]
+        y[:, 2, ::2, ::2] = f[:, 1, ::2, ::2]
+
+        y[:, 0, ::2, 1::2] = f[:, 3, ::2, 1::2]
+        y[:, 2, ::2, 1::2] = f[:, 2, ::2, 1::2]
+
+        y[:, 0, 1::2, ::2] = f[:, 2, 1::2, ::2]
+        y[:, 2, 1::2, ::2] = f[:, 3, 1::2, ::2]
+
+        y[:, 0, 1::2, 1::2] = f[:, 1, 1::2, 1::2]
+        y[:, 1, 1::2, 1::2] = f[:, 0, 1::2, 1::2]
+
+        return y
+
+
+def read_dng(dng_file, hq=False):
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
     with rawpy.imread(dng_file) as raw:
         img = torch.from_numpy(raw.raw_image_visible.astype(np.float32))
-        img = torch.stack([img[::2, ::2], (img[1::2, ::2] + img[::2, 1::2]) / 2, img[1::2, 1::2]])[None]
-        img = img.to(device)
+
+        if hq:
+            mhc = MHC().to(device)
+            img = mhc(img[None, None].to(device))
+
+        else:
+            img = torch.stack([img[::2, ::2], (img[1::2, ::2] + img[::2, 1::2]) / 2, img[1::2, 1::2]])[None]
+            img = img.to(device)
 
         low = (raw.black_level_per_channel[1] + raw.black_level_per_channel[3]) / 2
         if raw.camera_white_level_per_channel is None:
@@ -29,7 +73,24 @@ def read_dng(dng_file):
     return dict(img=img, flip=flip, wb=wb.to(device), color_mat=color_mat.to(device))
 
 
-def process_image(d, print_param=False):
+def dither(image):
+    image = image.clamp(0, 1)
+    scaled_image = image * 255
+    error = scaled_image - scaled_image.floor()
+    coeff_a = error[:, :, :-1, :-1]
+    coeff_b = error[:, :, :-1, 1:]
+    coeff_c = error[:, :, 1:, :-1]
+    coeff_d = error[:, :, 1:, 1:]
+    scaled_image[:, :, :-1, :-1] += 7 / 16 * coeff_a
+    scaled_image[:, :, :-1, 1:] += 1 / 16 * coeff_b
+    scaled_image[:, :, 1:, :-1] += 5 / 16 * coeff_c
+    scaled_image[:, :, 1:, 1:] += 3 / 16 * coeff_d
+    scaled_image = scaled_image.round()
+    scaled_image = scaled_image.clamp(0, 255) / 255
+    return scaled_image
+
+
+def process_image(d, print_param=False, hq=False):
     img = d["img"].clone()
     wb = d["wb"].clone()
     flip = d["flip"] + 1
@@ -83,6 +144,9 @@ def process_image(d, print_param=False):
 
     if print_param:
         print("PARAM:", wb, param[2])
+
+    if hq:
+        img = dither(img)
 
     return img
 

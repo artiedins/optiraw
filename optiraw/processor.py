@@ -41,7 +41,9 @@ class Processor:
 
         return loss
 
-    def process_best(self):
+    def process_best(self, hq=False):
         self.d["param"] = self.best_param.tolist()
-        img = process_image(self.d, print_param=True)
+        if hq:
+            self.d = read_dng(dng_file, hq=hq)
+        img = process_image(self.d, print_param=True, hq=hq)
         return img

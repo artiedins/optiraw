@@ -38,8 +38,9 @@ def fast_dng_to_jpg(input_dir, output_dir, slower_optimize=False):
         # minimize(pp, torch.randn(3).div(4).numpy(), options=dict(eps=1e-5))
         # minimize(pp, torch.randn(3).div(4).numpy(), options=dict(eps=1e-7))
 
-        img = pp.process_best()
+        hq = True
+        img = pp.process_best(hq=hq)
 
         img = img.squeeze(0).permute(1, 2, 0)
         img = img.mul(255).round().clamp(0, 255).byte().cpu().numpy()
-        Image.fromarray(img).save(out_file, quality=85)
+        Image.fromarray(img).save(out_file, quality=95 if hq else 85)
