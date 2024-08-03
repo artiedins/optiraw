@@ -24,11 +24,8 @@ class Processor:
             loss = 1 / self.iqa_model(img).view(-1).item()
 
         if loss < self.best_loss:
-            print(loss, param, "new best", flush=True)
             self.best_loss = float(loss)
             self.best_param = param.copy()
-        else:
-            print(loss, param, flush=True)
 
         return loss
 
