@@ -11,6 +11,7 @@ import math
 class Processor:
     def __init__(self, dng_file):
         self.d = read_dng(dng_file)
+        self.dng_file = dng_file
 
         wb = self.d["wb"].clone()
 
@@ -44,6 +45,6 @@ class Processor:
     def process_best(self, hq=False):
         self.d["param"] = self.best_param.tolist()
         if hq:
-            self.d = read_dng(dng_file, hq=hq)
+            self.d = read_dng(self.dng_file, hq=hq)
         img = process_image(self.d, print_param=True, hq=hq)
         return img
