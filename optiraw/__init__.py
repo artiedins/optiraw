@@ -6,6 +6,7 @@ from PIL import Image
 from tqdm import tqdm
 import numpy as np
 import gc
+import time
 
 
 def fast_dng_to_jpg(input_dir, output_dir, slower_optimize=False):
