@@ -47,6 +47,7 @@ class Processor:
         d = read_dng(self.dng_file, hq=hq)
 
         wb = d["wb"].clone()
+        print(wb)
         best_param = np.array([math.log(3.1397 / wb[0].item()), math.log(1.2964 / wb[2].item()), 0.1])
 
         d["param"] = best_param.tolist()
