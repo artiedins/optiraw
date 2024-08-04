@@ -60,7 +60,8 @@ def read_dng(dng_file, hq=False):
 
     if hq:
         mhc = MHC().to(device)
-        img = mhc(img[None, None].to(device))
+        with torch.inference_mode():
+            img = mhc(img[None, None].to(device))
 
     else:
         img = torch.stack([img[::2, ::2], (img[1::2, ::2] + img[::2, 1::2]) / 2, img[1::2, 1::2]])[None]
