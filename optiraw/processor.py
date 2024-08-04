@@ -2,6 +2,8 @@ import torch
 import numpy as np
 from .functional import process_image, read_dng, resize
 import logging
+import gc
+import time
 
 # from pyiqa.utils.registry import ARCH_REGISTRY
 import pyiqa
@@ -12,19 +14,15 @@ class Processor:
     def __init__(self, dng_file):
         self.d = read_dng(dng_file)
         self.dng_file = dng_file
-
         wb = self.d["wb"].clone()
-
         self.best_param = np.array([math.log(3.1397 / wb[0].item()), math.log(1.2964 / wb[2].item()), 0.1])
         self.best_loss = float("inf")
 
         # logger = logging.getLogger("pyiqa")
         # logger.setLevel(logging.WARNING)
-
         # self.iqa_model = ARCH_REGISTRY.get("CLIPIQA")(model_type="clipiqa+")
         # self.iqa_model.to(self.d["img"].device)
         # self.iqa_model.eval()
-
         # self.iqa_model = pyiqa.create_metric("clipiqa+", metric_mode="NR", device=self.d["img"].device)
         # self.iqa_model = pyiqa.create_metric("musiq", metric_mode="NR", device=self.d["img"].device)
 
@@ -44,7 +42,17 @@ class Processor:
 
     def process_best(self, hq=False):
         if hq:
+            del self.d["img"]
+            del self.d
             self.d = read_dng(self.dng_file, hq=hq)
         self.d["param"] = self.best_param.tolist()
         img = process_image(self.d, print_param=True, hq=hq)
+
+        del self.d["img"]
+        del self.d
+        time.sleep(0.02)
+        gc.collect()
+        time.sleep(0.02)
+        torch.cuda.empty_cache()
+
         return img

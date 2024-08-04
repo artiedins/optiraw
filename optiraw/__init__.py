@@ -49,7 +49,7 @@ def fast_dng_to_jpg(input_dir, output_dir, slower_optimize=False):
 
         del img
         del pp
-        time.sleep(0.1)
+        time.sleep(0.02)
         gc.collect()
-        time.sleep(0.1)
+        time.sleep(0.02)
         torch.cuda.empty_cache()
