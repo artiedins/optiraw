@@ -45,7 +45,7 @@ def fast_dng_to_jpg(input_dir, output_dir, slower_optimize=False):
 
         img = img.squeeze(0).permute(1, 2, 0)
         img = img.mul(255).round().clamp(0, 255).byte().cpu().numpy()
-        Image.fromarray(img).save(out_file, quality=95 if hq else 85)
+        Image.fromarray(img).save(out_file, quality=95 if hq else 85, subsampling=0)
 
         del img
         del pp
@@ -53,3 +53,4 @@ def fast_dng_to_jpg(input_dir, output_dir, slower_optimize=False):
         gc.collect()
         time.sleep(0.02)
         torch.cuda.empty_cache()
+        torch.cuda.synchronize()

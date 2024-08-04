@@ -12,7 +12,7 @@ import math
 
 class Processor:
     def __init__(self, dng_file):
-        self.d = read_dng(dng_file)
+        # self.d = read_dng(dng_file)
         self.dng_file = dng_file
         wb = self.d["wb"].clone()
         self.best_param = np.array([math.log(3.1397 / wb[0].item()), math.log(1.2964 / wb[2].item()), 0.1])
@@ -41,15 +41,15 @@ class Processor:
         return loss
 
     def process_best(self, hq=False):
-        if hq:
-            del self.d["img"]
-            del self.d
-            self.d = read_dng(self.dng_file, hq=hq)
-        self.d["param"] = self.best_param.tolist()
-        img = process_image(self.d, print_param=True, hq=hq)
+        # if hq:
+        # del self.d["img"]
+        # del self.d
+        d = read_dng(self.dng_file, hq=hq)
+        d["param"] = self.best_param.tolist()
+        img = process_image(d, print_param=True, hq=hq)
 
-        del self.d["img"]
-        del self.d
+        del d["img"]
+        del d
         time.sleep(0.02)
         gc.collect()
         time.sleep(0.02)
