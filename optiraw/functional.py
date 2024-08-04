@@ -49,6 +49,15 @@ def read_dng(dng_file, hq=False):
     with rawpy.imread(dng_file) as raw:
         img = torch.from_numpy(raw.raw_image_visible.astype(np.float32))
 
+        low = (raw.black_level_per_channel[1] + raw.black_level_per_channel[3]) / 2
+        if raw.camera_white_level_per_channel is None:
+            high = float(raw.white_level)
+        else:
+            high = (raw.camera_white_level_per_channel[1] + raw.camera_white_level_per_channel[3]) / 2
+        flip = int(raw.sizes.flip)
+        wb = np.array(raw.camera_whitebalance, dtype=np.float32)
+        color_mat = raw.color_matrix.astype(np.float32)
+
     if hq:
         mhc = MHC().to(device)
         img = mhc(img[None, None].to(device))
@@ -57,16 +66,7 @@ def read_dng(dng_file, hq=False):
         img = torch.stack([img[::2, ::2], (img[1::2, ::2] + img[::2, 1::2]) / 2, img[1::2, 1::2]])[None]
         img = img.to(device)
 
-    low = (raw.black_level_per_channel[1] + raw.black_level_per_channel[3]) / 2
-    if raw.camera_white_level_per_channel is None:
-        high = float(raw.white_level)
-    else:
-        high = (raw.camera_white_level_per_channel[1] + raw.camera_white_level_per_channel[3]) / 2
-
     img = (img - low) / (high - low)
-    flip = int(raw.sizes.flip)
-    wb = np.array(raw.camera_whitebalance, dtype=np.float32)
-    color_mat = raw.color_matrix.astype(np.float32)
     wb = torch.from_numpy(wb)[:3]
     color_mat = torch.from_numpy(color_mat)[:3, :3]
 
