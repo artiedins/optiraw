@@ -6,7 +6,7 @@ import gc
 import time
 
 # from pyiqa.utils.registry import ARCH_REGISTRY
-import pyiqa
+#import pyiqa
 import math
 
 
