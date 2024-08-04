@@ -6,7 +6,7 @@ import gc
 import time
 
 # from pyiqa.utils.registry import ARCH_REGISTRY
-#import pyiqa
+# import pyiqa
 import math
 
 
@@ -14,9 +14,9 @@ class Processor:
     def __init__(self, dng_file):
         # self.d = read_dng(dng_file)
         self.dng_file = dng_file
-        wb = self.d["wb"].clone()
-        self.best_param = np.array([math.log(3.1397 / wb[0].item()), math.log(1.2964 / wb[2].item()), 0.1])
-        self.best_loss = float("inf")
+        # wb = self.d["wb"].clone()
+        # self.best_param = np.array([math.log(3.1397 / wb[0].item()), math.log(1.2964 / wb[2].item()), 0.1])
+        # self.best_loss = float("inf")
 
         # logger = logging.getLogger("pyiqa")
         # logger.setLevel(logging.WARNING)
@@ -45,7 +45,11 @@ class Processor:
         # del self.d["img"]
         # del self.d
         d = read_dng(self.dng_file, hq=hq)
-        d["param"] = self.best_param.tolist()
+
+        wb = d["wb"].clone()
+        best_param = np.array([math.log(3.1397 / wb[0].item()), math.log(1.2964 / wb[2].item()), 0.1])
+
+        d["param"] = best_param.tolist()
         img = process_image(d, print_param=True, hq=hq)
 
         del d["img"]
